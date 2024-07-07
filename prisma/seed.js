@@ -80,50 +80,68 @@ async function seed() {
     ];
 
     for (const userData of usersData) {
-        const { profiles, posts, ...userWithoutPosts } = userData;
-        const user = await prisma.user.create({
-            data: {
-                ...userWithoutPosts,
+        try {
+            const { profiles, posts, ...userWithoutPosts } = userData;
+
+            // Constructing the data object to be passed to prisma.user.create()
+            const data = {
+                username: userWithoutPosts.username,
+                firstName: userWithoutPosts.firstName,
+                lastName: userWithoutPosts.lastName,
+                email: userWithoutPosts.email,
                 profiles: {
                     create: profiles.create,
                 },
                 posts: {
                     create: posts.create.map(post => ({
-                        ...post,
+                        title: post.title,
+                        content: post.content,
+                        published: post.published,
+                        pictureUrl: post.pictureUrl,
                         comments: {
                             create: post.comments.create,
                         },
                     })),
                 },
-            },
-            include: {
-                posts: {
-                    include: {
-                        comments: true,
+            };
+
+            console.log('Creating user with data:');
+            console.log(data);
+
+            const user = await prisma.user.create({
+                data,
+                include: {
+                    posts: {
+                        include: {
+                            comments: true,
+                        },
                     },
                 },
-            },
-        });
+            });
 
-        console.log(`User ${user.username} created with ID ${user.id}`);
+            console.log(`User ${user.username} created with ID ${user.id}`);
 
-        for (const post of user.posts) {
-            console.log(`Post "${post.title}" created with ID ${post.id}`);
+            for (const post of user.posts) {
+                console.log(`Post "${post.title}" created with ID ${post.id}`);
 
-            for (const comment of post.comments) {
-                console.log(`- Comment "${comment.content}" created with ID ${comment.id}`);
+                for (const comment of post.comments) {
+                    console.log(`- Comment "${comment.content}" created with ID ${comment.id}`);
+                }
             }
+        } catch (error) {
+            console.error(`Error creating user: ${error.message}`);
+            throw error; // Re-throw the error to stop further execution on error
         }
     }
 
     console.log(`${usersData.length} users created`);
 
-    // Don't edit any of the code below this line
+    // Disconnect Prisma client after seeding
     await prisma.$disconnect();
-    process.exit(0);
+    process.exit(0); // Exit process with success code
 }
 
 seed().catch((error) => {
-    console.error(error);
-    process.exit(1);
+    console.error(`Error in seed script: ${error.message}`);
+    process.exit(1); // Exit process with error code
 });
