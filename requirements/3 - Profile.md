@@ -2,8 +2,8 @@
 
 A profile should have, as a minimum, these fields:
 - An auto incrementing ID
-- A created at date & time, defaulting to the moment the record gets created
-- An updated at date & time
+- A createdAt date & time, defaulting to the moment the record gets created
+- An updatedAt date & time
 - A profile picture URL
 - A biography with a 120 character limit
 

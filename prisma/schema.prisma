@@ -19,5 +19,21 @@ model User {
   username    String    @unique @db.VarChar(10)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  profiles    Profile[]
+  
+  @@map("users")
 }
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  profilePic  String
+  biography   String   @db.VarChar(120)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("profiles")
+}
+
 
