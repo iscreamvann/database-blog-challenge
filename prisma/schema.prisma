@@ -20,6 +20,8 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   profiles    Profile[]
+  posts       Post[]    @relation("UserPosts")
+  comments    Comment[] @relation("UserComments")  // Added comments relation
   
   @@map("users")
 }
@@ -36,4 +38,31 @@ model Profile {
   @@map("profiles")
 }
 
+model Post {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String   @db.VarChar(150)
+  content     String
+  published   Boolean  @default(false)
+  pictureUrl  String?  @db.VarChar(255)
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id], name: "UserPosts")
+  comments    Comment[] // Added comments relation
+  
+  @@map("posts")
+}
 
+model Comment {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  content    String   @db.VarChar(250)
+  postId     Int
+  userId     Int
+
+  post       Post     @relation(fields: [postId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], name: "UserComments")
+  
+  @@map("comments")
+}
